@@ -179,6 +179,52 @@ box-shadow:0 0 40px #00e1ff;
 
 }
 
+button:disabled{
+opacity:.6;
+cursor:not-allowed;
+transform:none;
+}
+
+/* MENSAJE */
+
+.success-message{
+
+display:none;
+
+margin-top:20px;
+
+padding:18px;
+
+border-radius:18px;
+
+background:rgba(0,255,170,.12);
+
+border:1px solid rgba(0,255,170,.25);
+
+text-align:center;
+
+color:#9fffd5;
+
+font-weight:600;
+
+animation:fade .4s ease;
+
+}
+
+@keyframes fade{
+
+from{
+opacity:0;
+transform:translateY(10px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
 /* BOTON MUSICA */
 
 .music-btn{
@@ -279,9 +325,16 @@ Las solicitudes serán revisadas únicamente por el propietario, owner y co-owne
 
 <textarea id="explicacion" placeholder="Explica detalladamente lo ocurrido..."></textarea>
 
-<button onclick="enviarApelacion()">
+<button id="submitBtn" onclick="enviarApelacion()">
 ENVIAR APELACIÓN
 </button>
+
+<div class="success-message" id="successMessage">
+
+✅ Formulario enviado correctamente.<br>
+Puedes cerrar esta ventana ❄️
+
+</div>
 
 <div class="bottom">
 
@@ -305,19 +358,36 @@ ENVIAR APELACIÓN
 
 <script>
 
+let enviado = false;
+
 async function enviarApelacion(){
 
+if(enviado) return;
+
 const usuario =
-document.getElementById("usuario").value;
+document.getElementById("usuario").value.trim();
 
 const iddiscord =
-document.getElementById("iddiscord").value;
+document.getElementById("iddiscord").value.trim();
 
 const sancion =
-document.getElementById("sancion").value;
+document.getElementById("sancion").value.trim();
 
 const explicacion =
-document.getElementById("explicacion").value;
+document.getElementById("explicacion").value.trim();
+
+if(!usuario || !iddiscord || !sancion || !explicacion){
+
+alert("Completa todos los campos ❄️");
+return;
+
+}
+
+const boton =
+document.getElementById("submitBtn");
+
+boton.disabled = true;
+boton.innerText = "ENVIANDO...";
 
 /* WEBHOOK */
 
@@ -344,7 +414,7 @@ ${explicacion}`
 
 };
 
-/* ENVIAR */
+try{
 
 await fetch(webhookURL, {
 
@@ -358,7 +428,29 @@ body:JSON.stringify(mensaje)
 
 });
 
-alert("Apelación enviada correctamente ❄️");
+enviado = true;
+
+/* LIMPIAR FORMULARIO */
+
+document.getElementById("usuario").value = "";
+document.getElementById("iddiscord").value = "";
+document.getElementById("sancion").value = "";
+document.getElementById("explicacion").value = "";
+
+/* MENSAJE */
+
+document.getElementById("successMessage").style.display = "block";
+
+boton.innerText = "FORMULARIO ENVIADO ✅";
+
+}catch(error){
+
+alert("Error al enviar la apelación 💀");
+
+boton.disabled = false;
+boton.innerText = "ENVIAR APELACIÓN";
+
+}
 
 }
 
